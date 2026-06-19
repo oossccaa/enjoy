@@ -72,10 +72,12 @@ onMounted(() => {
 
 <template>
   <section class="screen quiz">
-    <button class="btn btn-ghost q-back" @click="emit('home')">← 回首頁</button>
     <div class="q-top">
-      <div class="step-dots">
-        <div v-for="(_, i) in total" :key="i" class="dot" :class="{ on: i === idx }" />
+      <div class="q-top-left">
+        <button class="q-back" aria-label="回首頁" @click="emit('home')">←</button>
+        <div class="step-dots">
+          <div v-for="(_, i) in total" :key="i" class="dot" :class="{ on: i === idx }" />
+        </div>
       </div>
       <div class="step-eyebrow">{{ current?.eyebrow }}</div>
     </div>

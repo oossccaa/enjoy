@@ -213,6 +213,33 @@ body {
   align-items: center;
   justify-content: space-between;
 }
+.q-top-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.q-back {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--amber);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.22s, border-color 0.22s, transform 0.12s;
+}
+.q-back:hover {
+  background: rgba(231, 166, 76, 0.1);
+  border-color: var(--amber);
+}
+.q-back:active {
+  transform: scale(0.94);
+}
 .step-dots {
   display: flex;
   gap: 7px;
@@ -289,11 +316,6 @@ body {
 }
 .choice:active {
   transform: scale(0.99);
-}
-.q-back {
-  position: absolute;
-  top: clamp(28px, 7vw, 44px);
-  right: clamp(24px, 6vw, 34px);
 }
 
 /* ---------- result ---------- */
