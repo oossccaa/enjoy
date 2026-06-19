@@ -1,2 +1,16 @@
+# 內部商業文件,勿入庫
 *.docx
+
+# 系統檔
 .DS_Store
+
+# 相依與建置產物
+node_modules
+dist
+*.tsbuildinfo
+
+# 本地工具設定
+.claude
+
+# 手動備份的舊單檔版本
+indexbackup.html
