@@ -1,45 +1,41 @@
-// 酒款 key — 新增酒款時在這裡加一個字面量,TS 會自動檢查 STEPS 權重是否打錯 key
-export type DrinkKey =
-  | 'pinot'
-  | 'spritz'
-  | 'old'
-  | 'marg'
-  | 'neg'
-  | 'mojito'
-  | 'martini'
-  | 'mule'
-  | 'espresso'
-  | 'sour'
+// ⚠️ 神秘感:型號 / 字母 / 暱稱僅供內部計分與對應,絕不渲染到畫面。
 
-export interface Drink {
-  name: string // 中文名
-  en: string // 英文名
-  tag: string // 性格標籤(結果頁徽章)
-  color: string // 酒液與光暈顏色
-  desc: string // 主推描述(第一名)
-  note: string // 光譜條展開的簡介(第二、三名)
-}
+export type Axis = 'EI' | 'SN' | 'TF' | 'JP'
+export type Letter = 'E' | 'I' | 'S' | 'N' | 'T' | 'F' | 'J' | 'P'
 
-// 一個選項可同時為多杯酒加分 → 讓「每杯獨立 %」成立
-export type Weights = Partial<Record<DrinkKey, number>>
-
-export interface Choice {
-  t: string // 選項文字
-  w: Weights // 各酒加權
-}
-
-export interface Step {
-  eyebrow: string // 題序
-  motif: MotifKey // 情境圖示
-  q: string // 題目文字
-  choices: Choice[]
-}
+// 16 型代碼(內部 key)
+export type TypeCode =
+  | 'INFP' | 'ENFP' | 'INFJ' | 'ENFJ'
+  | 'INTJ' | 'INTP' | 'ENTP' | 'ENTJ'
+  | 'ISFJ' | 'ESFJ' | 'ISFP' | 'ESFP'
+  | 'ISTJ' | 'ESTJ' | 'ISTP' | 'ESTP'
 
 export type MotifKey = 'door' | 'meet' | 'spark' | 'path' | 'taste' | 'glass'
 
-// 結果頁排名項目
-export interface Ranked {
-  k: DrinkKey
-  pct: number
-  d: Drink
+// 單一選項:顯示文字 + 內部加分字母
+export interface MbtiChoice {
+  t: string
+  letter: Letter
+}
+
+export interface MbtiQuestion {
+  axis: Axis // 內部用,不顯示
+  eyebrow: string // 氛圍小標
+  motif: MotifKey
+  q: string
+  a: MbtiChoice
+  b: MbtiChoice
+}
+
+// 一型 = 一杯靈魂調酒 + 文案
+export interface SoulType {
+  code: TypeCode // 內部 key,不顯示
+  nickname: string // MBTI 暱稱(內部保留,不顯示)
+  cocktailZh: string
+  cocktailEn: string
+  title: string // 性格頭銜(可顯示)
+  caption: string // 金句
+  desc: string // 結果文案
+  color: string // 酒液 / 光暈色
+  ratio?: string // 台灣比例(部分型才有)
 }
