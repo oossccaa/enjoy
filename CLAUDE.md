@@ -29,10 +29,10 @@
 ## 技術架構
 
 - **Vue 3 + TypeScript + Vite**(`<script setup>` SFC)。
-- 動畫:**GSAP 3**(npm 依賴,非 CDN)。
+- 動畫:**純 CSS**(`main.css` 的 `@keyframes` fadeUp / fadeIn / floatY / glowPulse;結果頁注杯是 `GlassSvg` 的 `translateY` transition)。GSAP 已不再使用(仍列在 `package.json` 但無 import,可日後移除)。
 - 字體:**Google Fonts**(Cormorant Garamond / Noto Serif TC / Noto Sans TC),走 CDN,在 `index.html` head 載入。
-- **行動優先設計**:`.stage` 寬度上限 440px、高度上限 920px;桌機上置中成一支手機大小的畫面。
-- 尊重 `prefers-reduced-motion`:偵測到時(`reduceMotion`,見 `src/util.ts`)略過所有 GSAP 動畫,直接顯示最終狀態。
+- **行動優先設計**:`.stage` 寬度上限 440px、高度上限 920px;桌機上置中成一支手機大小的畫面。`.stage` 的 `color` 設為琥珀色,故情境線稿 / 進度條 / 標籤等 `currentColor` 皆走琥珀。
+- 尊重 `prefers-reduced-motion`:偵測到時(`reduceMotion`,見 `src/util.ts`)注杯直接滿杯;`main.css` 的 media query 亦停用所有進場 / 漂浮 / 脈動動畫,直接顯示最終狀態。
 - **單頁狀態切換**,無 vue-router:`App.vue` 用 `mode` ref 在 `home / quiz / result` 之間切換,避免 GitHub Pages 深連結 404。
 
 ### 開發指令
@@ -55,21 +55,22 @@ src/
 ├── styles/main.css         # 全站樣式(:root 變數 + 各畫面)
 ├── data/
 │   ├── mbtiQuestions.ts    # MBTI_QUESTIONS — 12 題(改題目動這裡)
-│   ├── soulTypes.ts        # SOUL_TYPES — 16 型靈魂調酒 + 文案(改結果動這裡)
-│   └── motifs.ts           # MOTIF — 情境 inline SVG 圖示
+│   ├── soulTypes.ts        # SOUL_TYPES — 16 型靈魂調酒 + 文案 + 杯型/裝飾(改結果動這裡)
+│   ├── scenes.ts           # SCENES — 12 題各自的情境線稿(依題序,QuizScreen 用 SCENES[idx])
+│   └── glasses.ts          # GLASS — 六種酒杯幾何規格(clip / outline / 液面 / 杯緣)
 ├── composables/
 │   └── useMbti.ts          # 計分引擎(多數決 → 型號 → 靈魂調酒)
 └── components/
-    ├── HomeScreen.vue      # 單一進場(品牌 + 酒杯 + 開始)
-    ├── QuizScreen.vue      # 12 題二選一 + 頂部進度條 + 返回箭頭
-    ├── ResultScreen.vue    # 結果頁(注杯 + 頭銜 + 調酒名 + 金句 + 文案,不露型號)
-    └── GlassSvg.vue        # 酒杯 + 液面 SVG
+    ├── HomeScreen.vue      # 單一進場(Soul Cocktail 小標 + coupe 示意杯 + 開始測驗)
+    ├── QuizScreen.vue      # 12 題二選一 + 頂部進度條 + 返回箭頭 + 每題情境線稿
+    ├── ResultScreen.vue    # 結果頁(注杯 + 頭銜 + 調酒名 + 金句 + 文案 + Tris Workshop,頁尾不露型號)
+    └── GlassSvg.vue        # 依 glass 造型描邊 + 注液(poured 觸發)+ garnish 裝飾
 ```
 
 ### 資料模型(改內容主要動這兩個檔)
-- **`SOUL_TYPES`**(`src/data/soulTypes.ts`)— `Record<TypeCode, SoulType>`,16 型。每型有 `code`(內部 key,**不顯示**)、`nickname`(MBTI 暱稱,**不顯示**)、`cocktailZh`、`cocktailEn`、`title`(性格頭銜)、`caption`(金句)、`desc`(結果文案)、`color`(酒液/光暈色)、`ratio?`(台灣比例,部分型才有)。
-- **`MBTI_QUESTIONS`**(`src/data/mbtiQuestions.ts`)— `MbtiQuestion[]`,12 題。每題有 `axis`(內部用,EI/SN/TF/JP)、`eyebrow`(氛圍小標)、`motif`、`q`、`a`、`b`。`a`/`b` 各是 `{ t: 選項文字, letter: 加分字母 }`。
-  - **每軸務必維持 3 題(奇數,才不會平手)**;`a.letter` / `b.letter` 必須是該軸的兩個字母。
+- **`SOUL_TYPES`**(`src/data/soulTypes.ts`)— `Record<TypeCode, SoulType>`,16 型。每型有 `code`(內部 key,**不顯示**)、`nickname`(MBTI 暱稱,**不顯示**)、`cocktailZh`、`cocktailEn`、`title`(性格頭銜)、`caption`(金句)、`desc`(結果文案)、`color`(酒液/光暈色)、`glass`(杯型:rocks/highball/coupe/martini/flute/margarita)、`garnish`(裝飾:cherry/olive/citrus/mint/twist/none)、`ratio?`(台灣比例,部分型才有)。
+- **`MBTI_QUESTIONS`**(`src/data/mbtiQuestions.ts`)— `MbtiQuestion[]`,12 題。每題有 `axis`(內部用,EI/SN/TF/JP)、`eyebrow`(氛圍小標)、`q`、`a`、`b`。`a`/`b` 各是 `{ t: 選項文字, letter: 加分字母 }`。情境插畫改由 `SCENES[idx]`(`src/data/scenes.ts`)依題序對應。
+  - **每軸務必維持 3 題(奇數,才不會平手)**;`a.letter` / `b.letter` 必須是該軸的兩個字母。改題數時 `scenes.ts` 也要同步增減。
 
 ### 計分邏輯(`src/composables/useMbti.ts`)
 - `apply(choice)` 記錄該題選到的字母;`next()` 前進一題(刻意分開,讓畫面先淡出舊內容再換題)。
@@ -79,10 +80,11 @@ src/
 ## 常見開發任務
 
 - **改題目 / 選項** → 編輯 `src/data/mbtiQuestions.ts`。維持每軸 3 題、`letter` 對到正確軸向。
-- **改結果文案 / 調酒 / 顏色** → 編輯 `src/data/soulTypes.ts`。
-- **客製成某間店** → 16 型對到的 16 杯換成該店酒單(改 `SOUL_TYPES` 的調酒名與文案)、`ResultScreen.vue` 的 `◯◯ BAR` 店名;品牌字樣在 `HomeScreen.vue`。
+- **改結果文案 / 調酒 / 顏色 / 杯型 / 裝飾** → 編輯 `src/data/soulTypes.ts`(`glass` / `garnish` 決定結果頁畫的杯子)。新增杯型要在 `src/data/glasses.ts` 補幾何。
+- **改題目情境插畫** → 編輯 `src/data/scenes.ts`(inline SVG 路徑,置於 viewBox `0 0 120 120`)。
+- **客製成某間店** → 16 型對到的 16 杯換成該店酒單(改 `SOUL_TYPES` 的調酒名 / 文案 / 杯型);頁尾字樣在 `ResultScreen.vue`(目前為 Tris Workshop),品牌字樣在 `HomeScreen.vue`。
 - **調整配色** → 改 `src/styles/main.css` 的 `:root` 變數;各杯酒顏色在 `SOUL_TYPES[*].color`。
-- **改動畫** → 各元件 `onMounted` / `playStep` 裡的 GSAP timeline(`HomeScreen` 進場、`QuizScreen` 題目轉場、`ResultScreen` 注杯)。
+- **改動畫** → 進場 / 漂浮 / 脈動都在 `main.css` 的 `@keyframes` 與各 class;注杯在 `GlassSvg.vue`(`poured` 觸發 `translateY` transition)。
 - **⚠️ 切記**:任何顯示到畫面的改動都不要把型號 / 字母 / MBTI 暱稱 / 「人格測驗」字樣露出來。
 
 ## 部署

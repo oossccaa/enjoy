@@ -10,7 +10,9 @@ export type TypeCode =
   | 'ISFJ' | 'ESFJ' | 'ISFP' | 'ESFP'
   | 'ISTJ' | 'ESTJ' | 'ISTP' | 'ESTP'
 
-export type MotifKey = 'door' | 'meet' | 'spark' | 'path' | 'taste' | 'glass'
+// 酒杯造型與裝飾(結果頁注杯用)
+export type GlassType = 'rocks' | 'highball' | 'coupe' | 'martini' | 'flute' | 'margarita'
+export type GarnishType = 'cherry' | 'olive' | 'citrus' | 'mint' | 'twist' | 'none'
 
 // 單一選項:顯示文字 + 內部加分字母
 export interface MbtiChoice {
@@ -21,7 +23,6 @@ export interface MbtiChoice {
 export interface MbtiQuestion {
   axis: Axis // 內部用,不顯示
   eyebrow: string // 氛圍小標
-  motif: MotifKey
   q: string
   a: MbtiChoice
   b: MbtiChoice
@@ -37,5 +38,7 @@ export interface SoulType {
   caption: string // 金句
   desc: string // 結果文案
   color: string // 酒液 / 光暈色
+  glass: GlassType // 酒杯造型
+  garnish: GarnishType // 裝飾
   ratio?: string // 台灣比例(部分型才有)
 }
