@@ -17,15 +17,13 @@ const active = ref<SoulType | null>(null)
   <section class="screen gallery" :class="{ locked: active }">
     <div class="sh-top">
       <button class="q-back" aria-label="返回" @click="emit('back')">←</button>
-      <div class="sh-eyebrow">十六杯靈魂調酒</div>
+      <div class="sh-eyebrow">查看所有經典調酒</div>
     </div>
     <p class="gal-intro">每一杯,都是一種靈魂的樣子。<br />點開看看,哪一杯最像你——或你身邊的誰。</p>
 
     <div class="gal-grid">
       <button v-for="d in drinks" :key="d.cocktailEn" class="gal-item" @click="active = d">
         <img class="gal-thumb" :src="SHARE_CARDS[d.code]" :alt="d.cocktailZh" loading="lazy" />
-        <div class="gal-name">{{ d.cocktailZh }}</div>
-        <div class="gal-title">{{ d.title }}</div>
       </button>
     </div>
 
