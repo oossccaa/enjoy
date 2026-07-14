@@ -788,14 +788,20 @@ body {
   color: var(--muted);
   letter-spacing: 0.04em;
 }
+/* modal 開啟時鎖住圖庫背景捲動 */
+.gallery.locked {
+  overflow: hidden;
+}
 .gal-detail {
-  position: absolute;
+  /* fixed 貼齊視窗:absolute 會貼在可捲動容器的內容頂端,往下捲後點卡 modal 會跑到最上面 */
+  position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 30;
   background: rgba(7, 9, 13, 0.88);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 26px 26px calc(34px + env(safe-area-inset-bottom));
 }
 .gal-detail::-webkit-scrollbar {

@@ -14,7 +14,7 @@ const active = ref<SoulType | null>(null)
 </script>
 
 <template>
-  <section class="screen gallery">
+  <section class="screen gallery" :class="{ locked: active }">
     <div class="sh-top">
       <button class="q-back" aria-label="返回" @click="emit('back')">←</button>
       <div class="sh-eyebrow">十六杯靈魂調酒</div>
