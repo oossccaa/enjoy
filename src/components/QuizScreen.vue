@@ -30,7 +30,13 @@ function onPick(choice: MbtiChoice) {
 <template>
   <section class="screen quiz">
     <div class="q-top">
-      <button class="q-back" aria-label="返回" @click="emit('home')">←</button>
+      <!-- home icon:「←」會被誤解成回上一題,實際是回首頁 -->
+      <button class="q-back" aria-label="回首頁" @click="emit('home')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11.5 12 4l9 7.5" />
+          <path d="M5.5 10V20h13V10" />
+        </svg>
+      </button>
       <div class="q-progress">
         <div class="q-progress-fill" :style="{ width: progress + '%' }" />
       </div>
@@ -44,7 +50,8 @@ function onPick(choice: MbtiChoice) {
       <h2 class="q-text">{{ current.q }}</h2>
     </div>
 
-    <div class="q-choices">
+    <!-- :key 讓每題的選項按鈕重新掛載,清掉觸控殘留的 hover / focus 狀態 -->
+    <div class="q-choices" :key="'c' + idx">
       <button class="choice" @click="onPick(current.a)">{{ current.a.t }}</button>
       <button class="choice" @click="onPick(current.b)">{{ current.b.t }}</button>
     </div>

@@ -131,9 +131,6 @@ body {
   cursor: pointer;
   transition: filter 0.25s ease, transform 0.15s ease;
 }
-.btn:hover {
-  filter: brightness(1.08);
-}
 .btn:active {
   transform: scale(0.97);
 }
@@ -142,10 +139,17 @@ body {
   color: currentColor;
   border: 1px solid var(--line);
 }
-.btn-ghost:hover {
-  background: rgba(231, 166, 76, 0.1);
-  color: #fff;
-  filter: none;
+/* hover 樣式只給真的有游標的裝置:觸控點擊會讓 :hover 黏住,
+   例如答完題下一題的同位置選項會殘留高亮,誘導作答 */
+@media (hover: hover) {
+  .btn:hover {
+    filter: brightness(1.08);
+  }
+  .btn-ghost:hover {
+    background: rgba(231, 166, 76, 0.1);
+    color: #fff;
+    filter: none;
+  }
 }
 
 /* ---------- home (single intro) ---------- */
@@ -227,9 +231,11 @@ body {
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.12s;
 }
-.q-back:hover {
-  background: rgba(231, 166, 76, 0.12);
-  border-color: currentColor;
+@media (hover: hover) {
+  .q-back:hover {
+    background: rgba(231, 166, 76, 0.12);
+    border-color: currentColor;
+  }
 }
 .q-back:active {
   transform: scale(0.94);
@@ -311,10 +317,12 @@ body {
   line-height: 1.6;
   transition: background 0.22s, border-color 0.22s, color 0.22s, transform 0.12s;
 }
-.choice:hover {
-  background: rgba(231, 166, 76, 0.1);
-  border-color: rgba(231, 166, 76, 0.32);
-  color: #fff;
+@media (hover: hover) {
+  .choice:hover {
+    background: rgba(231, 166, 76, 0.1);
+    border-color: rgba(231, 166, 76, 0.32);
+    color: #fff;
+  }
 }
 .choice:active {
   transform: scale(0.99);
@@ -455,8 +463,10 @@ body {
   text-decoration: none;
   transition: color 0.3s;
 }
-.footer-link:hover {
-  color: currentColor;
+@media (hover: hover) {
+  .footer-link:hover {
+    color: currentColor;
+  }
 }
 .footer-rule {
   display: block;
@@ -480,8 +490,10 @@ body {
   cursor: pointer;
   transition: filter 0.25s, transform 0.15s;
 }
-.btn-solid:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .btn-solid:hover {
+    filter: brightness(1.08);
+  }
 }
 .btn-solid:active {
   transform: scale(0.97);
@@ -575,10 +587,13 @@ body {
 }
 .sh-photo {
   position: relative;
-  width: 172px;
-  height: 208px;
+  /* 照片隨視窗高縮放(手機扣掉瀏覽器 UI 常只剩 ~700px 高),
+     盡量讓整頁一屏放完;產卡腳本視窗 920px 高,固定取到上限 172px 不受影響 */
+  --pw: clamp(122px, 19.5dvh, 172px);
+  width: var(--pw);
+  height: calc(var(--pw) * 1.21);
   margin: 14px auto 6px;
-  border-radius: 86px 86px 8px 8px;
+  border-radius: calc(var(--pw) / 2) calc(var(--pw) / 2) 8px 8px;
   overflow: hidden;
   border: 1px solid rgba(231, 166, 76, 0.4);
 }
@@ -725,6 +740,67 @@ body {
   letter-spacing: 0.16em;
 }
 
+/* 矮視窗:收緊留白,讓「卡片 + 提示 + 按鈕」盡量一屏放完 */
+@media (max-height: 880px) {
+  .share-screen {
+    padding-top: 14px;
+  }
+  .sh-top {
+    margin-bottom: 10px;
+  }
+  .sh-card {
+    padding: 22px 26px 18px;
+  }
+  .sh-photo {
+    margin: 10px auto 4px;
+  }
+  .sh-label {
+    margin: 6px 0;
+  }
+  .sh-chip {
+    margin: 12px 0 2px;
+  }
+  .sh-divider {
+    margin: 12px 0;
+  }
+  .sh-foot {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .sh-hint {
+    margin: 10px 0;
+  }
+}
+/* 更矮(手機瀏覽器 UI 佔掉高度後的常見尺寸):再縮字級 */
+@media (max-height: 760px) {
+  .sh-zh {
+    font-size: 28px;
+  }
+  .sh-en {
+    font-size: 16px;
+  }
+  .sh-caption {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .sh-hint {
+    font-size: 10.5px;
+    margin: 8px 0;
+  }
+  .sh-card {
+    padding: 18px 24px 16px;
+  }
+  .sh-actions {
+    gap: 8px;
+  }
+  .sh-actions .btn-solid {
+    padding: 13px;
+  }
+  .sh-actions-row .btn {
+    padding: 11px;
+  }
+}
+
 /* ---------- gallery(圖庫:16 張分享圖卡) ---------- */
 .hero-gallery {
   margin-top: 12px;
@@ -820,6 +896,10 @@ body {
 }
 .gal-detail-card {
   width: min(300px, 82%);
+  /* 大圖載入前先按圖卡比例撐位,避免整個 modal 內容跳動 */
+  aspect-ratio: 400 / 644;
+  object-fit: contain;
+  background: center / contain no-repeat var(--night-2);
   display: block;
   border-radius: 8px;
   border: 1px solid rgba(231, 166, 76, 0.34);

@@ -31,25 +31,16 @@ function finish(type: SoulType) {
   mode.value = 'result'
 }
 
-function again() {
-  result.value = null
-  runId.value++
-  mode.value = 'quiz'
-  if (glowEl.value) glowEl.value.style.background = DEFAULT_GLOW
-}
-
+// 「再測一次」一律回首頁(不直接重進測驗)
 function goHome() {
   result.value = null
   mode.value = 'home'
   if (glowEl.value) glowEl.value.style.background = DEFAULT_GLOW
 }
 
-// 結果 ⇄ 分享頁(光暈維持該杯酒色)
+// 結果 → 分享頁(光暈維持該杯酒色)
 function openShare() {
   mode.value = 'share'
-}
-function backToResult() {
-  mode.value = 'result'
 }
 
 // 首頁 ⇄ 圖庫
@@ -69,15 +60,14 @@ function openGallery() {
         v-else-if="mode === 'result' && result"
         key="result"
         :type="result"
-        @again="again"
+        @again="goHome"
         @share="openShare"
       />
       <ShareScreen
         v-else-if="mode === 'share' && result"
         key="share"
         :type="result"
-        @back="backToResult"
-        @again="again"
+        @again="goHome"
       />
     </Transition>
   </div>

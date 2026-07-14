@@ -38,7 +38,13 @@ const active = ref<SoulType | null>(null)
       <div v-if="active" class="gal-detail" @click.self="active = null">
         <!-- inner 撐滿浮層,空白處點擊也要能關 -->
         <div class="gal-detail-inner" @click.self="active = null">
-          <img class="gal-detail-card" :src="SHARE_CARDS[active.code]" :alt="active.cocktailZh" />
+          <!-- 大圖未載入前:aspect-ratio 撐住位置(文字不跳),已快取的縮圖墊底過渡 -->
+          <img
+            class="gal-detail-card"
+            :src="SHARE_CARDS[active.code]"
+            :alt="active.cocktailZh"
+            :style="{ backgroundImage: `url(${SHARE_CARD_THUMBS[active.code]})` }"
+          />
           <p class="gal-desc">{{ active.desc }}</p>
           <button class="btn btn-ghost gal-close" @click="active = null">關 閉</button>
         </div>

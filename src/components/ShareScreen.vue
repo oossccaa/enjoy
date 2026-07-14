@@ -11,7 +11,7 @@ import { hexA } from '../util'
 import qrEnjoy from '../images/qr-enjoy.svg'
 
 const props = defineProps<{ type: SoulType }>()
-const emit = defineEmits<{ (e: 'back'): void; (e: 'again'): void }>()
+const emit = defineEmits<{ (e: 'again'): void }>()
 
 const shareLabel = ref('分享我的靈魂調酒')
 const saveLabel = ref('儲存圖卡')
@@ -78,11 +78,6 @@ async function save() {
 
 <template>
   <section class="screen share-screen">
-    <div class="sh-top">
-      <button class="q-back" aria-label="返回" @click="emit('back')">←</button>
-      <div class="sh-eyebrow">留住今晚這一杯</div>
-    </div>
-
     <!-- 可截圖的圖卡(也是預渲染圖卡的版型) -->
     <div
       class="sh-card"
