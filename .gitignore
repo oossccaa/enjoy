@@ -2,6 +2,9 @@
 *.docx
 files/
 
+# 酒照原圖(1254px PNG,每張 ~1.7MB)不入公開 repo;僅壓縮後的 src/images/opt/ 入庫
+src/images/*.png
+
 # 系統檔
 .DS_Store
 

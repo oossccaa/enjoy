@@ -5,4 +5,13 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   base: '/enjoy/',
   plugins: [vue()],
+  build: {
+    rollupOptions: {
+      input: {
+        // 雙進入點:index = 測驗本體;board = 16 杯設計圖板(/enjoy/board.html)
+        main: './index.html',
+        board: './board.html',
+      },
+    },
+  },
 })

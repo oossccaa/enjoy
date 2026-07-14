@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import GlassSvg from './GlassSvg.vue'
 
-const emit = defineEmits<{ (e: 'start'): void }>()
+const emit = defineEmits<{ (e: 'start'): void; (e: 'gallery'): void }>()
 
 // 首頁示意杯:琥珀色 coupe + 檸檬皮捲,直接滿杯漂浮
 const ACCENT = '#e7a64c'
@@ -17,5 +17,6 @@ const ACCENT = '#e7a64c'
     <div class="hero-sub">Which one is yours tonight?</div>
     <p class="hero-line">回答十二個問題,走一段短短的夜路。<br />路的盡頭,有一杯只屬於你的酒。</p>
     <button class="btn hero-start" @click="emit('start')">開 始 測 驗</button>
+    <button class="btn btn-ghost hero-gallery" @click="emit('gallery')">查看所有圖卡</button>
   </section>
 </template>

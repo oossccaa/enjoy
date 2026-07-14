@@ -5,8 +5,10 @@ import { hexA } from './util'
 import HomeScreen from './components/HomeScreen.vue'
 import QuizScreen from './components/QuizScreen.vue'
 import ResultScreen from './components/ResultScreen.vue'
+import ShareScreen from './components/ShareScreen.vue'
+import GalleryScreen from './components/GalleryScreen.vue'
 
-type Mode = 'home' | 'quiz' | 'result'
+type Mode = 'home' | 'quiz' | 'result' | 'share' | 'gallery'
 
 const mode = ref<Mode>('home')
 const result = ref<SoulType | null>(null)
@@ -41,15 +43,42 @@ function goHome() {
   mode.value = 'home'
   if (glowEl.value) glowEl.value.style.background = DEFAULT_GLOW
 }
+
+// 結果 ⇄ 分享頁(光暈維持該杯酒色)
+function openShare() {
+  mode.value = 'share'
+}
+function backToResult() {
+  mode.value = 'result'
+}
+
+// 首頁 ⇄ 圖庫
+function openGallery() {
+  mode.value = 'gallery'
+}
 </script>
 
 <template>
   <div class="stage">
     <div ref="glowEl" class="glow" />
     <Transition name="fade" mode="out-in">
-      <HomeScreen v-if="mode === 'home'" key="home" @start="start" />
+      <HomeScreen v-if="mode === 'home'" key="home" @start="start" @gallery="openGallery" />
+      <GalleryScreen v-else-if="mode === 'gallery'" key="gallery" @back="goHome" />
       <QuizScreen v-else-if="mode === 'quiz'" :key="'quiz-' + runId" @finish="finish" @home="goHome" />
-      <ResultScreen v-else-if="result" key="result" :type="result" @again="again" />
+      <ResultScreen
+        v-else-if="mode === 'result' && result"
+        key="result"
+        :type="result"
+        @again="again"
+        @share="openShare"
+      />
+      <ShareScreen
+        v-else-if="mode === 'share' && result"
+        key="share"
+        :type="result"
+        @back="backToResult"
+        @again="again"
+      />
     </Transition>
   </div>
 </template>
