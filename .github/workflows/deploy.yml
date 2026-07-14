@@ -26,7 +26,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      # Pages 鏡像部署在 /enjoy/ 子路徑;主站(Vercel)用預設 base '/'
+      - run: npm run build -- --base=/enjoy/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

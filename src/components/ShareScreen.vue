@@ -99,8 +99,8 @@ async function save() {
           <div class="sh-brand">NIGHTCAP</div>
           <div class="sh-sub">Soul Cocktail</div>
         </div>
-        <!-- 稀有度膠囊:有比例顯示比例,沒有的顯示型號(產品方決定僅此處露出 MBTI) -->
-        <div class="sh-rarity">{{ type.ratio ? `全臺僅 ${type.ratio}` : type.code }}</div>
+        <!-- 型號膠囊:一律顯示 MBTI(產品方決定僅圖卡此處露出) -->
+        <div class="sh-rarity">{{ type.code }}</div>
       </div>
 
       <div class="sh-photo">

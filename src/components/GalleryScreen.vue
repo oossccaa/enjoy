@@ -5,7 +5,7 @@
 import { ref } from 'vue'
 import type { SoulType } from '../types'
 import { SOUL_TYPES } from '../data/soulTypes'
-import { SHARE_CARDS } from '../data/shareCards'
+import { SHARE_CARDS, SHARE_CARD_THUMBS } from '../data/shareCards'
 
 const emit = defineEmits<{ (e: 'back'): void }>()
 
@@ -23,7 +23,13 @@ const active = ref<SoulType | null>(null)
 
     <div class="gal-grid">
       <button v-for="d in drinks" :key="d.cocktailEn" class="gal-item" @click="active = d">
-        <img class="gal-thumb" :src="SHARE_CARDS[d.code]" :alt="d.cocktailZh" loading="lazy" />
+        <img
+          class="gal-thumb"
+          :src="SHARE_CARD_THUMBS[d.code]"
+          :alt="d.cocktailZh"
+          loading="lazy"
+          decoding="async"
+        />
       </button>
     </div>
 

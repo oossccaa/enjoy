@@ -769,6 +769,10 @@ body {
 }
 .gal-thumb {
   width: 100%;
+  /* 卡高隨金句行數在 614–644 之間,取最高者撐版;contain 避免變形、不裁四角刻線 */
+  aspect-ratio: 400 / 644;
+  object-fit: contain;
+  background: var(--night-2);
   display: block;
   border-radius: 6px;
   border: 1px solid rgba(231, 166, 76, 0.22);

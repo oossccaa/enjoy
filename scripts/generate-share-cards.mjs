@@ -1,13 +1,14 @@
-/* 預先渲染 16 張分享圖卡:
+/* 預先渲染 16 張分享圖卡 + 圖庫縮圖:
    用 puppeteer 驅動真瀏覽器走完測驗(每型一次),進分享頁後
-   對 .sh-card 圖卡以 3x 截圖,輸出 src/images/cards/<調酒slug>.jpg。
-   圖卡文案 / 樣式改動後重跑一次即可:
+   對 .sh-card 圖卡以 3x 截圖,輸出 src/images/cards/<調酒slug>.jpg,
+   並用 sips 產 400px 寬縮圖到 cards/thumbs/(圖庫格子用,省流量)。
+   圖卡文案 / 樣式 / QR 改動後重跑一次即可:
 
      npm run build && node scripts/generate-share-cards.mjs
 
    需要本機 Chrome(可用 PUPPETEER_EXECUTABLE_PATH 覆蓋路徑)。 */
 import puppeteer from 'puppeteer-core'
-import { spawn } from 'node:child_process'
+import { spawn, execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -48,7 +49,8 @@ function readQuestionLetters() {
 }
 
 const questions = readQuestionLetters()
-fs.mkdirSync(OUT_DIR, { recursive: true })
+const THUMB_DIR = path.join(OUT_DIR, 'thumbs')
+fs.mkdirSync(THUMB_DIR, { recursive: true })
 
 // 起一個 vite preview 伺服器(服務 dist/)
 const server = spawn('npx', ['vite', 'preview', '--port', String(PORT)], {
@@ -63,7 +65,7 @@ try {
   await page.setViewport({ width: 440, height: 920, deviceScaleFactor: 3 })
 
   for (const [code, slug] of Object.entries(SLUGS)) {
-    await page.goto(`http://localhost:${PORT}/enjoy/`, { waitUntil: 'networkidle0' })
+    await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0' })
     // 開始測驗
     await page.evaluate(() => {
       const btn = [...document.querySelectorAll('button')].find((b) =>
@@ -96,8 +98,15 @@ try {
     })
     await new Promise((r) => setTimeout(r, 900)) // 等卡片進場動畫結束
     const el = await page.$('.sh-card')
-    await el.screenshot({ path: path.join(OUT_DIR, `${slug}.jpg`), type: 'jpeg', quality: 88 })
-    console.log(`✓ ${slug}.jpg`)
+    const cardPath = path.join(OUT_DIR, `${slug}.jpg`)
+    await el.screenshot({ path: cardPath, type: 'jpeg', quality: 88 })
+    // 圖庫縮圖:400px 寬(格子顯示約 180px,留 2x retina)
+    execFileSync('sips', [
+      '-s', 'format', 'jpeg', '-s', 'formatOptions', '75',
+      '--resampleWidth', '400',
+      cardPath, '--out', path.join(THUMB_DIR, `${slug}.jpg`),
+    ], { stdio: 'ignore' })
+    console.log(`✓ ${slug}.jpg (+thumb)`)
   }
 } finally {
   await browser.close()

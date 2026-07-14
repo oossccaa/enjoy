@@ -16,7 +16,7 @@
 - **計分**:每軸 3 題多數決得一個字母(奇數題、永不平手),四字母組成 16 型代碼 → 對到一杯靈魂調酒與一段性格文案。
 - **⚠️ 保持神秘感(重要產品要求)**:對使用者**完全不透露這是 MBTI / 性格分類測驗,不顯示 MBTI 暱稱(如「調停者」)**。
   - 型號 `code`、字母 `letter`、暱稱 `nickname` 僅供內部計分與資料對應,原則上不渲染到畫面。
-  - **唯一例外(2026-07 產品方決定)**:分享圖卡右上的稀有度膠囊 — 該型有 `ratio` 顯示「全臺僅 X%」,沒有的顯示型號(如 ENTP)。除此之外任何畫面仍不得露出型號。
+  - **唯一例外(2026-07 產品方決定)**:分享圖卡右上的膠囊一律顯示型號(如 ENTP)。除此之外任何畫面仍不得露出型號。
   - 介面 / 文案 / 題目不得出現「MBTI / 16 型人格 / 性格類型 / E·I·S·N」等字眼。
   - 整體包裝成「酒吧讀出你的靈魂,為你斟上專屬的那一杯」。
 - **結果頁顯示**:氛圍小標 → 靈魂調酒真實酒照(拱門相框,載入後顯影)→ 性格頭銜 `title` → 調酒中/英文名 → 金句 `caption` → 結果文案 `desc`。不顯示型號、不顯示契合度。
@@ -56,7 +56,7 @@ src/
 ├── styles/main.css         # 全站樣式(:root 變數 + 各畫面)
 ├── images/                 # 16 杯酒照原圖(<型號>.png,已 gitignore 不入庫)
 │   ├── opt/                # sips 壓縮後 JPEG(檔名用調酒 slug,避免打包網址露型號)— 入庫
-│   └── cards/              # 預渲染的 16 張分享圖卡 1080×1620(npm run cards 產生)— 入庫
+│   └── cards/              # 預渲染的 16 張分享圖卡(npm run cards 產生;thumbs/ 是圖庫用 400px 縮圖)— 入庫
 ├── data/
 │   ├── mbtiQuestions.ts    # MBTI_QUESTIONS — 12 題(改題目動這裡)
 │   ├── soulTypes.ts        # SOUL_TYPES — 16 型靈魂調酒 + 文案 + 杯型/裝飾(改結果動這裡)
@@ -93,23 +93,22 @@ src/
 - **客製成某間店** → 16 型對到的 16 杯換成該店酒單(改 `SOUL_TYPES` 的調酒名 / 文案 / 杯型);頁尾字樣在 `ResultScreen.vue` 與 `ShareScreen.vue`(目前為 Tris Studio),品牌字樣在 `HomeScreen.vue`。
 - **調整配色** → 改 `src/styles/tokens.css` 的 `:root` 變數(兩個進入點共用);各杯酒顏色在 `SOUL_TYPES[*].color`。
 - **換某杯的酒照** → 原圖放 `src/images/<型號>.png`,用 `sips -s format jpeg -s formatOptions 80 --resampleHeightWidthMax 1000` 壓成 `src/images/opt/<調酒slug>.jpg`,對應寫在 `src/data/drinkImages.ts`。**opt/ 檔名務必用調酒 slug、不可用型號**(打包後的資源網址看得到檔名)。換照後記得重跑 `npm run cards`。
-- **改分享圖卡** → 版型是 `ShareScreen.vue` 的 `.sh-card`(樣式在 `main.css` 的 `.sh-*`,規格出自 Claude Design 專案「分享畫面美化建議」的 SHARE 畫面)。改完版型、酒照或 `SOUL_TYPES` 文案後,跑 `npm run build && npm run cards` 重新產出 `src/images/cards/`(用本機 Chrome 走完測驗、進分享頁對 `.sh-card` 3x 截圖,真排版引擎渲染,不會有 canvas / html-to-image 的字型失真問題)。分享流程:結果頁「分享結果」→ 分享頁,優先 `navigator.share` 傳圖檔(手機),不支援就下載 JPEG;「儲存圖卡」直接下載。
+- **改分享圖卡** → 版型是 `ShareScreen.vue` 的 `.sh-card`(樣式在 `main.css` 的 `.sh-*`,規格出自 Claude Design 專案「分享畫面美化建議」的 SHARE 畫面)。改完版型、酒照或 `SOUL_TYPES` 文案後,跑 `npm run build && npm run cards` 重新產出 `src/images/cards/`(用本機 Chrome 走完測驗、進分享頁對 `.sh-card` 3x 截圖,真排版引擎渲染,不會有 canvas / html-to-image 的字型失真問題;會一併產圖庫用的 400px 縮圖到 `cards/thumbs/`)。分享流程:結果頁「分享結果」→ 分享頁,優先 `navigator.share` 傳圖檔(手機),不支援就下載 JPEG;「儲存圖卡」直接下載。
+- **改圖卡上的 QR 網址** → 重產 `src/images/qr-enjoy.svg`:`node -e "require('qrcode').toFile('src/images/qr-enjoy.svg','<新網址>',{type:'svg',margin:1,color:{dark:'#141a24',light:'#f1ebde'}},e=>{if(e)throw e})"`,然後 `npm run build && npm run cards` 重產圖卡。
 - **改動畫** → 進場 / 漂浮 / 脈動都在 `main.css` 的 `@keyframes` 與各 class;結果頁酒照顯影在 `main.css` 的 `.res-photo` / `.res-img`;示意杯注杯在 `GlassSvg.vue`(`poured` 觸發 `translateY` transition)。
 - **⚠️ 切記**:任何顯示到畫面的改動都不要把型號 / 字母 / MBTI 暱稱 / 「人格測驗」字樣露出來。
 
 ## 部署
 
-GitHub Pages 由 **GitHub Actions** 部署(`.github/workflows/deploy.yml`):push 到 `main` → `npm ci && npm run build` → 把 `dist/` 部署到 Pages。
+**主站:Vercel**(連 GitHub repo,push 到 `main` 自動部署,base `'/'`)。選 Vercel 是因為 GitHub Pages 對台灣走新加坡節點且快取僅 10 分鐘,圖片載入慢(實測單張 1.5s)。
+
+**鏡像:GitHub Pages**(`.github/workflows/deploy.yml`,build 時用 `--base=/enjoy/` 覆蓋)→ https://oossccaa.github.io/enjoy/ 仍可用,但圖卡上的 QR 指向 Vercel 主站。
 
 ```bash
-git add -A
-git commit -m "..."
-git push
+git add -A && git commit -m "..." && git push   # 兩邊都會自動部署
 ```
 
-push 後到 GitHub Actions 看 deploy workflow,綠燈後(約 1–2 分鐘)demo 網址 https://oossccaa.github.io/enjoy/ 隨之更新。
-
-> **重要:** Vite 的 `base` 設為 `/enjoy/`(見 `vite.config.ts`),對應 repo 名稱。若改 repo 名,這裡要一起改,否則資源路徑會 404。
+> **重要:** `vite.config.ts` 的 `base` 是 `'/'`(Vercel 用);Pages 子路徑由 workflow 的 `--base=/enjoy/` 提供,不要改回寫死。
 
 ## 注意事項
 
