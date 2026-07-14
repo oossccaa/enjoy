@@ -6,8 +6,3 @@ export function hexA(hex: string, a: number): string {
   const b = parseInt(h.substr(4, 2), 16)
   return `rgba(${Math.min(r + 90, 255)},${Math.min(g + 60, 255)},${Math.min(b + 30, 255)},${a})`
 }
-
-// 是否偏好減少動態
-export const reduceMotion =
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
