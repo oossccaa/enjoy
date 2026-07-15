@@ -22,7 +22,8 @@ export interface MbtiChoice {
 
 export interface MbtiQuestion {
   axis: Axis // 內部用,不顯示
-  eyebrow: string // 氛圍小標
+  eyebrow: string // 氛圍小標(不含序號;序號由 QuizScreen 依實際進行順序標)
+  scene: string // 情境線稿(inline SVG 內容,置於 viewBox 0 0 120 120、stroke=currentColor)
   q: string
   a: MbtiChoice
   b: MbtiChoice

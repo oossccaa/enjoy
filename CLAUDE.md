@@ -10,10 +10,11 @@
 
 > 商業背景整理自內部企劃書 `癮酒-合作企劃書.docx`(刻意未納入 git,見「注意事項」)。
 
-### 測驗形式:12 題,推出一杯靈魂調酒
+### 測驗形式:8 題基本 + 平手軸加問(最多 12 題),推出一杯靈魂調酒
 
-- **題庫**:12 題情境二選一(A / B),內部對應 MBTI 四軸(E/I、S/N、T/F、J/P),每軸 3 題。
-- **計分**:每軸 3 題多數決得一個字母(奇數題、永不平手),四字母組成 16 型代碼 → 對到一杯靈魂調酒與一段性格文案。
+- **題庫**:情境二選一(A / B),內部對應 MBTI 四軸(E/I、S/N、T/F、J/P)。基本題每軸 2 題共 8 題(EI→SN→TF→JP 交錯兩輪),另備每軸 1 題加問題。
+- **流程與計分**:答完 8 題後,哪個軸 1:1 平手就加問該軸的加問題(必成 2:1);多數決得四個字母組成 16 型代碼 → 對到一杯靈魂調酒與一段性格文案。大多數人 8~10 題,四軸全平手才 12 題。
+- **降低作答壓力(2026-07 客戶回饋)**:畫面**不顯示總題數**(只有進度條),序號依實際進行順序標(i., ii., …)。
 - **⚠️ 保持神秘感(重要產品要求)**:對使用者**完全不透露這是 MBTI / 性格分類測驗,不顯示 MBTI 暱稱(如「調停者」)**。
   - 型號 `code`、字母 `letter`、暱稱 `nickname` 僅供內部計分與資料對應,原則上不渲染到畫面。
   - **唯一例外(2026-07 產品方決定)**:分享圖卡右上的膠囊一律顯示型號(如 ENTP)。除此之外任何畫面仍不得露出型號。
@@ -58,17 +59,16 @@ src/
 │   ├── opt/                # sips 壓縮後 JPEG(檔名用調酒 slug,避免打包網址露型號)— 入庫
 │   └── cards/              # 預渲染的 16 張分享圖卡(npm run cards 產生;thumbs/ 是圖庫用 400px 縮圖)— 入庫
 ├── data/
-│   ├── mbtiQuestions.ts    # MBTI_QUESTIONS — 12 題(改題目動這裡)
+│   ├── mbtiQuestions.ts    # BASE_QUESTIONS(8)+ TIEBREAKER_QUESTIONS(每軸 1)— 改題目動這裡,scene 插畫也在題目物件上
 │   ├── soulTypes.ts        # SOUL_TYPES — 16 型靈魂調酒 + 文案 + 杯型/裝飾(改結果動這裡)
 │   ├── drinkImages.ts      # DRINK_IMAGES — 型號 → 酒照(import opt/*.jpg,對應僅存內部)
 │   ├── shareCards.ts       # SHARE_CARDS — 型號 → 分享圖卡(import cards/*.jpg)
-│   ├── scenes.ts           # SCENES — 12 題各自的情境線稿(依題序,QuizScreen 用 SCENES[idx])
 │   └── glasses.ts          # GLASS — 六種酒杯幾何規格(clip / outline / 液面 / 杯緣)
 ├── composables/
-│   └── useMbti.ts          # 計分引擎(多數決 → 型號 → 靈魂調酒)
+│   └── useMbti.ts          # 計分引擎(動態題列:基本 8 題 + extend() 加問平手軸 → 型號 → 靈魂調酒)
 └── components/
     ├── HomeScreen.vue      # 單一進場(Soul Cocktail 小標 + coupe 示意杯 + 開始測驗 + 查看所有圖卡)
-    ├── QuizScreen.vue      # 12 題二選一 + 頂部進度條 + 返回箭頭 + 每題情境線稿
+    ├── QuizScreen.vue      # 二選一動態題列 + 進度條(無總題數)+ home icon + 每題情境線稿
     ├── ResultScreen.vue    # 結果頁(拱門酒照 + 頭銜 + 調酒名 + 金句 + 文案,「分享結果」進分享頁)
     ├── ShareScreen.vue     # 分享頁(可截圖的 .sh-card 圖卡 + 系統分享 / 下載;也是預渲染圖卡的版型)
     ├── GalleryScreen.vue   # 圖庫頁(首頁「查看所有圖卡」進入;16 張圖卡縮圖,點開大圖 + 結果文案)
@@ -77,21 +77,23 @@ src/
 
 ### 資料模型(改內容主要動這兩個檔)
 - **`SOUL_TYPES`**(`src/data/soulTypes.ts`)— `Record<TypeCode, SoulType>`,16 型。每型有 `code`(內部 key,**不顯示**)、`nickname`(MBTI 暱稱,**不顯示**)、`cocktailZh`、`cocktailEn`、`title`(性格頭銜)、`caption`(金句)、`desc`(結果文案)、`color`(酒液/光暈色)、`glass`(杯型:rocks/highball/coupe/martini/flute/margarita)、`garnish`(裝飾:cherry/olive/citrus/mint/twist/none)、`ratio?`(台灣比例,部分型才有)。
-- **`MBTI_QUESTIONS`**(`src/data/mbtiQuestions.ts`)— `MbtiQuestion[]`,12 題。每題有 `axis`(內部用,EI/SN/TF/JP)、`eyebrow`(氛圍小標)、`q`、`a`、`b`。`a`/`b` 各是 `{ t: 選項文字, letter: 加分字母 }`。情境插畫改由 `SCENES[idx]`(`src/data/scenes.ts`)依題序對應。
-  - **每軸務必維持 3 題(奇數,才不會平手)**;`a.letter` / `b.letter` 必須是該軸的兩個字母。改題數時 `scenes.ts` 也要同步增減。
+- **題庫**(`src/data/mbtiQuestions.ts`)— `BASE_QUESTIONS: MbtiQuestion[]`(8 題基本,每軸 2 題、EI→SN→TF→JP 交錯)+ `TIEBREAKER_QUESTIONS: Record<Axis, MbtiQuestion>`(每軸 1 題加問)。每題有 `axis`(內部用)、`eyebrow`(氛圍小標,**不含序號**,序號由 QuizScreen 依實際進行順序標)、`scene`(該題情境線稿 inline SVG,viewBox `0 0 120 120`)、`q`、`a`、`b`。`a`/`b` 各是 `{ t: 選項文字, letter: 加分字母 }`。
+  - **基本題每軸務必維持 2 題、加問題每軸恰 1 題**;`a.letter` / `b.letter` 必須是該軸的兩個字母。改基本題數量或順序後要重跑 `npm run cards`(產卡腳本依 BASE_QUESTIONS 的 letter 順序作答)。
 
 ### 計分邏輯(`src/composables/useMbti.ts`)
-- `apply(choice)` 記錄該題選到的字母;`next()` 前進一題(刻意分開,讓畫面先淡出舊內容再換題)。
+- 題列 `queue` 以 `BASE_QUESTIONS` 起始;`apply(choice)` 記錄該題字母、`next()` 前進(刻意分開,讓畫面先淡出舊內容再換題)。
+- 站在最後一題作答後呼叫 `extend()`:哪個軸兩字母數量相等(1:1)就把該軸的加問題排進 `queue`,回傳是否有新增;加問後該軸必為 2:1,不會再平手。
 - `result()`:四軸各數字母多數決 → 依序 E/I,S/N,T/F,J/P 組成 `TypeCode` → 回傳 `SOUL_TYPES[code]`。
+- 進度條以「目前題列長度」計,不顯示總題數;加問使題列變長時允許小幅回退。
 - 測驗中環境光暈維持預設琥珀色,結果頁才把 `#glow` 染成該杯酒的 `color`。
 
 ## 常見開發任務
 
-- **改題目 / 選項** → 編輯 `src/data/mbtiQuestions.ts`。維持每軸 3 題、`letter` 對到正確軸向。
+- **改題目 / 選項** → 編輯 `src/data/mbtiQuestions.ts`。基本題維持每軸 2 題、加問題每軸 1 題,`letter` 對到正確軸向;改完重跑 `npm run cards` 確認可產卡。
 - **改結果文案 / 調酒 / 顏色 / 杯型 / 裝飾** → 編輯 `src/data/soulTypes.ts`(`glass` / `garnish` 決定結果頁畫的杯子)。新增杯型要在 `src/data/glasses.ts` 補幾何。
-- **改題目情境插畫** → 編輯 `src/data/scenes.ts`(inline SVG 路徑,置於 viewBox `0 0 120 120`)。
+- **改題目情境插畫** → 編輯該題物件的 `scene` 欄位(`src/data/mbtiQuestions.ts`,inline SVG 路徑,置於 viewBox `0 0 120 120`)— 插畫跟著題目走,不會因調整題序而錯位。
 - **客製成某間店** → 16 型對到的 16 杯換成該店酒單(改 `SOUL_TYPES` 的調酒名 / 文案 / 杯型);頁尾字樣在 `ResultScreen.vue` 與 `ShareScreen.vue`(目前為 Tris Studio),品牌字樣在 `HomeScreen.vue`。
-- **調整配色** → 改 `src/styles/tokens.css` 的 `:root` 變數(兩個進入點共用);各杯酒顏色在 `SOUL_TYPES[*].color`。
+- **調整配色** → 改 `src/styles/main.css` 的 `:root` 變數;各杯酒顏色在 `SOUL_TYPES[*].color`。
 - **換某杯的酒照** → 原圖放 `src/images/<型號>.png`,用 `sips -s format jpeg -s formatOptions 80 --resampleHeightWidthMax 1000` 壓成 `src/images/opt/<調酒slug>.jpg`,對應寫在 `src/data/drinkImages.ts`。**opt/ 檔名務必用調酒 slug、不可用型號**(打包後的資源網址看得到檔名)。換照後記得重跑 `npm run cards`。
 - **改分享圖卡** → 版型是 `ShareScreen.vue` 的 `.sh-card`(樣式在 `main.css` 的 `.sh-*`,規格出自 Claude Design 專案「分享畫面美化建議」的 SHARE 畫面)。改完版型、酒照或 `SOUL_TYPES` 文案後,跑 `npm run build && npm run cards` 重新產出 `src/images/cards/`(用本機 Chrome 走完測驗、進分享頁對 `.sh-card` 3x 截圖,真排版引擎渲染,不會有 canvas / html-to-image 的字型失真問題;會一併產圖庫用的 400px 縮圖到 `cards/thumbs/`)。分享流程:結果頁「分享結果」→ 分享頁,優先 `navigator.share` 傳圖檔(手機),不支援就下載 JPEG;「儲存圖卡」直接下載。
 - **改圖卡上的 QR 網址** → 重產 `src/images/qr-enjoy.svg`:`node -e "require('qrcode').toFile('src/images/qr-enjoy.svg','<新網址>',{type:'svg',margin:1,color:{dark:'#141a24',light:'#f1ebde'}},e=>{if(e)throw e})"`,然後 `npm run build && npm run cards` 重產圖卡。

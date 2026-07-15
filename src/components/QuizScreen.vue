@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { MbtiChoice, SoulType } from '../types'
-import { SCENES } from '../data/scenes'
 import { useMbti } from '../composables/useMbti'
 
 const emit = defineEmits<{
@@ -9,21 +8,24 @@ const emit = defineEmits<{
   (e: 'home'): void
 }>()
 
-const { total, idx, current, isLast, apply, next, result } = useMbti()
+const { idx, current, isLast, progress, apply, next, extend, result } = useMbti()
 
-const progress = computed(() => Math.round(((idx.value + 1) / total) * 100))
-const countLabel = computed(() => String(idx.value + 1).padStart(2, '0') + ' / ' + total)
+// 序號依實際進行順序標(加問題接續編號);不顯示總題數,降低作答壓力
+const ROMAN = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii']
+const eyebrow = computed(() => `${ROMAN[idx.value]}. ${current.value.eyebrow}`)
+
 // 把該題情境路徑包成完整 <svg>(stroke=currentColor 走琥珀色)
 const scene = computed(
   () =>
     `<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.5" ` +
-    `stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%">${SCENES[idx.value] || ''}</svg>`,
+    `stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%">${current.value.scene}</svg>`,
 )
 
 function onPick(choice: MbtiChoice) {
   apply(choice)
-  if (isLast.value) emit('finish', result())
-  else next()
+  if (!isLast.value) return next()
+  if (extend()) return next() // 有軸平手 → 加問,繼續作答
+  emit('finish', result())
 }
 </script>
 
@@ -40,12 +42,11 @@ function onPick(choice: MbtiChoice) {
       <div class="q-progress">
         <div class="q-progress-fill" :style="{ width: progress + '%' }" />
       </div>
-      <div class="q-count">{{ countLabel }}</div>
     </div>
 
     <!-- key 隨題序變動 → 重新掛載,重播 fadeUp 進場 -->
     <div class="q-mid" :key="idx">
-      <div class="q-eyebrow">{{ current.eyebrow }}</div>
+      <div class="q-eyebrow">{{ eyebrow }}</div>
       <div class="scene" v-html="scene" />
       <h2 class="q-text">{{ current.q }}</h2>
     </div>

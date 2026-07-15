@@ -40,12 +40,15 @@ const SLUGS = {
   ESTP: 'paloma',
 }
 
-// 從題庫原始碼依序取出每題 a/b 的加分字母(避免重複維護對應表)
+// 從題庫原始碼取出「基本題」每題 a/b 的加分字母(避免重複維護對應表)。
+// 依目標型號一致作答 → 每軸 2:0 永不平手 → 固定 8 題就進結果頁。
 function readQuestionLetters() {
   const src = fs.readFileSync(path.join(ROOT, 'src/data/mbtiQuestions.ts'), 'utf8')
-  const letters = [...src.matchAll(/letter:\s*'([EISNTFJP])'/g)].map((m) => m[1])
-  if (letters.length !== 24) throw new Error(`預期 24 個 letter,實得 ${letters.length}`)
-  return Array.from({ length: 12 }, (_, i) => ({ a: letters[i * 2], b: letters[i * 2 + 1] }))
+  // 用 export 宣告行切割(頂部註解也提到 TIEBREAKER_QUESTIONS,不能用裸字串切)
+  const baseSection = src.split('export const TIEBREAKER_QUESTIONS')[0]
+  const letters = [...baseSection.matchAll(/letter:\s*'([EISNTFJP])'/g)].map((m) => m[1])
+  if (letters.length !== 16) throw new Error(`預期基本題 16 個 letter,實得 ${letters.length}`)
+  return Array.from({ length: 8 }, (_, i) => ({ a: letters[i * 2], b: letters[i * 2 + 1] }))
 }
 
 const questions = readQuestionLetters()
@@ -73,8 +76,8 @@ try {
       )
       btn?.click()
     })
-    // 依目標型號作答
-    for (let i = 0; i < 12; i++) {
+    // 依目標型號作答(一致作答 → 基本 8 題直達結果)
+    for (let i = 0; i < 8; i++) {
       await page.waitForSelector('.choice', { visible: true, timeout: 5000 })
       const pick = code.includes(questions[i].a) ? 0 : 1
       const choices = await page.$$('.choice')
