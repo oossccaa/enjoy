@@ -18,5 +18,6 @@ const ACCENT = '#e7a64c'
     <p class="hero-line">回答十二個問題,走一段短短的夜路。<br />路的盡頭,有一杯只屬於你的酒。</p>
     <button class="btn hero-start" @click="emit('start')">開 始 測 驗</button>
     <button class="btn btn-ghost hero-gallery" @click="emit('gallery')">查看所有圖卡</button>
+    <p class="disclaimer">本測驗僅供娛樂與自我探索參考，不具專業心理評估或診斷效力。</p>
   </section>
 </template>

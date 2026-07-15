@@ -447,6 +447,16 @@ body {
 }
 
 /* ---------- footer ---------- */
+.disclaimer {
+  font-size: 10.5px;
+  color: rgba(142, 137, 123, 0.75);
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+  text-align: center;
+  text-wrap: balance; /* 需斷行時左右均衡,避免孤字 */
+  margin-top: 18px;
+  animation: fadeIn 1.6s ease both;
+}
 .footer-note {
   margin-top: auto;
   padding-top: 20px;
@@ -958,6 +968,7 @@ body {
   .res-caption,
   .res-desc,
   .res-actions,
+  .disclaimer,
   .sh-card,
   .sh-card-glow {
     animation: none !important;

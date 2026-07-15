@@ -33,6 +33,8 @@ const loaded = ref(false)
       <button class="btn btn-ghost" @click="emit('again')">再測一次</button>
     </div>
 
+    <p class="disclaimer">本測驗僅供娛樂與自我探索參考，不具專業心理評估或診斷效力。</p>
+
     <div class="footer-note">
       <a href="https://tris.workshop" target="_blank" rel="noopener" class="footer-link">
         <span class="footer-rule" />
