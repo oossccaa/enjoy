@@ -2,12 +2,12 @@
 /* 分享頁(規格出自 Claude Design「靈魂調酒 enjoy.dc.html」的 SHARE 畫面):
    可截圖的圖卡 + 系統分享 / 下載。卡片中央以真實酒照取代設計稿的線稿杯。
    .sh-card 同時是 scripts/generate-share-cards.mjs 預渲染 16 張靜態圖卡的版型。 */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { SoulType } from '../types'
 import { DRINK_IMAGES } from '../data/drinkImages'
 import { SHARE_CARDS } from '../data/shareCards'
 import { hexA } from '../util'
-// 指向 https://oossccaa.github.io/enjoy/ 的 QR(產生方式見 CLAUDE.md)
+// 指向 https://soul-cocktail.vercel.app/ 的 QR(產生方式見 CLAUDE.md)
 import qrEnjoy from '../images/qr-enjoy.svg'
 
 const props = defineProps<{ type: SoulType }>()
@@ -17,19 +17,27 @@ const shareLabel = ref('分享我的靈魂調酒')
 const saveLabel = ref('儲存圖卡')
 const busy = ref(false)
 
-// 分享圖卡是預先渲染好的靜態圖(npm run cards),抓一次共用
+// 系統分享用的 blob:進頁先預熱,按下按鈕時幾乎同步返回,
+// 避免 Safari 因 async 間隔判定「失去使用者手勢」而擋掉分享
 let cardBlob: Blob | null = null
 async function card(): Promise<Blob> {
   if (!cardBlob) cardBlob = await (await fetch(SHARE_CARDS[props.type.code])).blob()
   return cardBlob
 }
+onMounted(() => {
+  card().catch(() => {})
+})
 
-function download(blob: Blob) {
+/* 下載走同步直連:圖卡是同源靜態檔,<a download> 直接指資產網址。
+   不經 fetch/blob → 點擊全程同步,Safari 不會因手勢過期或
+   blob URL 提早 revoke 而下載失敗 */
+function downloadDirect() {
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
+  a.href = SHARE_CARDS[props.type.code]
   a.download = `靈魂調酒-${props.type.cocktailZh}.jpg`
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(a.href)
+  a.remove()
 }
 
 // 優先走系統分享(手機可直接傳圖給朋友);不支援分享圖檔時退回下載
@@ -38,22 +46,24 @@ async function share() {
   busy.value = true
   try {
     const t = props.type
-    const blob = await card()
-    const file = new File([blob], `靈魂調酒-${t.cocktailZh}.jpg`, { type: 'image/jpeg' })
     const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean }
-    if (nav.canShare?.({ files: [file] })) {
-      await navigator
-        .share({
-          files: [file],
-          title: '你的靈魂調酒是哪一杯?',
-          text: `我的靈魂調酒是「${t.cocktailZh}」——${t.caption}`,
-        })
-        .catch(() => {}) // 使用者取消分享不算錯
-    } else {
-      download(blob)
-      shareLabel.value = '已存圖,快分享吧 ✓'
-      setTimeout(() => (shareLabel.value = '分享我的靈魂調酒'), 2000)
+    if (typeof nav.canShare === 'function') {
+      const blob = await card() // 已預熱,通常立即返回
+      const file = new File([blob], `靈魂調酒-${t.cocktailZh}.jpg`, { type: 'image/jpeg' })
+      if (nav.canShare({ files: [file] })) {
+        await navigator
+          .share({
+            files: [file],
+            title: '你的靈魂調酒是哪一杯?',
+            text: `我的靈魂調酒是「${t.cocktailZh}」——${t.caption}`,
+          })
+          .catch(() => {}) // 使用者取消分享不算錯
+        return
+      }
     }
+    downloadDirect()
+    shareLabel.value = '已存圖,快分享吧 ✓'
+    setTimeout(() => (shareLabel.value = '分享我的靈魂調酒'), 2000)
   } catch {
     shareLabel.value = '分享失敗'
   } finally {
@@ -61,18 +71,11 @@ async function share() {
   }
 }
 
-async function save() {
-  if (busy.value) return
-  busy.value = true
-  try {
-    download(await card())
-    saveLabel.value = '已儲存 ✓'
-    setTimeout(() => (saveLabel.value = '儲存圖卡'), 2000)
-  } catch {
-    saveLabel.value = '儲存失敗'
-  } finally {
-    busy.value = false
-  }
+// 儲存圖卡:全同步,Safari 也穩
+function save() {
+  downloadDirect()
+  saveLabel.value = '已儲存 ✓'
+  setTimeout(() => (saveLabel.value = '儲存圖卡'), 2000)
 }
 </script>
 
