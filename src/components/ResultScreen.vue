@@ -36,7 +36,7 @@ const loaded = ref(false)
     <p class="disclaimer">本測驗僅供娛樂與自我探索參考，不具專業心理評估或診斷效力。</p>
 
     <div class="footer-note">
-      <a href="https://tris.workshop" target="_blank" rel="noopener" class="footer-link">
+      <a href="https://tris-studio.vercel.app/" target="_blank" rel="noopener" class="footer-link">
         <span class="footer-rule" />
         Tris Studio
         <span class="footer-rule" />
